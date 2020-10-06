@@ -372,4 +372,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   prefixes:
-  - http://localhost:8080/spawnBox/
+  - http://*:8080/

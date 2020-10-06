@@ -1,13 +1,14 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using UnityEngine;
+using UnityEngine.Networking;
+using System;
+using System.IO;
 using System.Net;
-using UnityEngine;
+using System.Threading;
 
 public class WebServerController : MonoBehaviour
 {
-    public string[] prefixes;
     private HttpListener listener;
+    private Thread listenerThread;
 
     // Start is called before the first frame update
     void Start()
@@ -18,27 +19,54 @@ public class WebServerController : MonoBehaviour
             return;
         }
 
-        // URI prefixes are required,
-        // for example "http://localhost:8080/spawnBox/".
-        if (prefixes == null || prefixes.Length == 0)
-            throw new ArgumentException("prefixes");
-
         // Create a listener.
-        HttpListener listener = new HttpListener();
+        listener = new HttpListener();
 
-        // Add the prefixes.
-        foreach (string s in prefixes)
-        {
-            listener.Prefixes.Add(s);
-        }
+        // Add a prefix
+        listener.Prefixes.Add("http://*:8080/");
+
+        listener.AuthenticationSchemes = AuthenticationSchemes.Anonymous;
         listener.Start();
 
-        Debug.Log("Server started...");
+        listenerThread = new Thread(StartListener);
+        listenerThread.Start();
+        Debug.Log("Server Started");
     }
 
-    // Update is called once per frame
-    void Update()
+    private void Update()
     {
-        
+    }
+
+    private void StartListener()
+    {
+        while (true)
+        {
+            var result = listener.BeginGetContext(ListenerCallback, listener);
+            result.AsyncWaitHandle.WaitOne();
+        }
+    }
+
+    private void ListenerCallback(IAsyncResult result)
+    {
+        var context = listener.EndGetContext(result);
+
+        Debug.Log("Method: " + context.Request.HttpMethod);
+        Debug.Log("LocalUrl: " + context.Request.Url.LocalPath);
+
+        if (context.Request.QueryString.AllKeys.Length > 0)
+            foreach (var key in context.Request.QueryString.AllKeys)
+            {
+                Debug.Log("Key: " + key + ", Value: " + context.Request.QueryString.GetValues(key)[0]);
+            }
+
+        if (context.Request.HttpMethod == "POST")
+        {
+            Thread.Sleep(1000);
+            var data_text = new StreamReader(context.Request.InputStream,
+                                context.Request.ContentEncoding).ReadToEnd();
+            Debug.Log(data_text);
+        }
+
+        context.Response.Close();
     }
 }
