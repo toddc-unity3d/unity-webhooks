@@ -96,6 +96,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   controller: {fileID: 5379856753397041841}
+  item: {fileID: 6688334991980476551, guid: e0c6ab3923da94380ae28c5cec7e00f1, type: 3}
+  player: {fileID: 5379856754035203353}
   speed: 12
   gravity: -9.81
   jumpHeight: 3

@@ -2,9 +2,12 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerMovement : MonoBehaviour
+public class PlayerController : MonoBehaviour
 {
     public CharacterController controller;
+    public GameObject item;
+    public float spawnDistance = 3.0f;
+
     public float speed = 12f;
     public float gravity = -9.81f;
     public float jumpHeight = 3f;
@@ -43,5 +46,21 @@ public class PlayerMovement : MonoBehaviour
         // Gravity update
         velocity.y += gravity * Time.deltaTime;
         controller.Move(velocity * Time.deltaTime);
+
+        // Check for item spawn
+        if(Input.GetKeyDown("f"))
+        {
+            StartCoroutine(SpawnItem());
+        }
+    }
+
+    // Spawn an item
+    IEnumerator SpawnItem()
+    {
+        Vector3 spawnPosition = Camera.main.transform.position + Camera.main.transform.forward * spawnDistance;
+
+        Instantiate(item, spawnPosition, Quaternion.identity);
+
+        yield return new WaitForSeconds(0.1f);
     }
 }
